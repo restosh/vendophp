@@ -1,0 +1,25 @@
+{
+  "name": "restosh/vendophp",
+  "type": "library",
+  "description": "VendoPHP framework",
+  "keywords": [],
+  "homepage": "https://vendophp.com",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Resto Software House",
+      "email": "hello@resto.sh"
+    }
+  ],
+  "require": {
+    "php": ">=7.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "VendoPHP\\": ""
+    },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  }
+}
