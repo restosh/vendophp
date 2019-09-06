@@ -81,9 +81,9 @@ class Cache
      */
     public static function get(string $key)
     {
-        $isDebug = Env::isCache();
+        $isCache = Env::isCache();
 
-        if (true === $isDebug) {
+        if (false === $isCache) {
             return null;
         }
 
@@ -97,7 +97,7 @@ class Cache
             return null;
         }
 
-        $value = json_decode(file_get_contents($filename));
+        $value = json_decode(file_get_contents($filename), true);
 
         self::$cache[$key] = $value;
 

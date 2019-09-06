@@ -42,6 +42,7 @@ class Routing
             return self::$routesNameMap[$name];
         }
 
+        return '/';
     }
 
     private function load(): void
@@ -91,6 +92,13 @@ class Routing
         $url = (isset($_GET['_url']) ? $_GET['_url'] : '/');
 
         if (isset(self::$routes[$url])) {
+
+            if (!empty(self::$routes[$url]['methods'])) {
+                if (!in_array($this->getRequestMethod(), self::$routes[$url]['methods'])) {
+                    throw new NotFoundException(NotFoundException::MESSAGE);
+                }
+            }
+
             $this->setClassName(self::$routes[$url]['className']);
             $this->setMethodName(self::$routes[$url]['methodName']);
 
@@ -132,11 +140,16 @@ class Routing
         return $this->methodName;
     }
 
+    public function getRequestMethod(): string
+    {
+        return strtoupper($_SERVER['REQUEST_METHOD']);
+    }
+
     public static function redirect($name)
     {
         $url = self::url($name);
         header("Location: " . $url);
-       // die();
+        // die();
     }
 
 }

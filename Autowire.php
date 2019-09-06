@@ -39,12 +39,12 @@ class Autowire
 
             Event::invoke(Event::BEFORE, $class, $method);
 
-            try {
+         //   try {
                 return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
 
-            } catch (\Exception $exception) {
-                Event::invoke(Event::EXCEPTION, $class, $method);
-            }
+            //} catch (\Exception $exception) {
+           //     Event::invoke(Event::EXCEPTION, $class, $method);
+         //   }
             
             Event::invoke(Event::AFTER, $class, $method);
         }
