@@ -13,6 +13,7 @@ class Routing
 {
 
     const CACHE_ROUTING_FILES = 'vendophp.routing';
+    const CACHE_ROUTING_MAP_FILES = 'vendophp.routing_map';
 
     private static $routes = [];
     private static $routesNameMap = [];
@@ -51,8 +52,9 @@ class Routing
         $routeInit = new Route([]);
 
         self::$routes = Cache::get(self::CACHE_ROUTING_FILES);
+        self::$routesNameMap = Cache::get(self::CACHE_ROUTING_MAP_FILES);
 
-        if (null === self::$routes) {
+        if (null === self::$routes || null === self::$routesNameMap) {
 
             $directory = new \RecursiveDirectoryIterator(Env::getPath('DIR_CONTROLLER'));
             $iterator = new \RecursiveIteratorIterator($directory);
@@ -70,19 +72,26 @@ class Routing
                             $route->setClassName($controllerClassName);
                             $route->setMethodName($method->getName());
 
-                            $key = $route->getUrl();
-
                             if (null !== $route->getName()) {
-                                self::$routesNameMap[$route->getName()] = $key;
-                            }
+                                $key = $route->getUrl();
 
-                            self::$routes[$key] = (array)$route;
+                                if (is_array($key)) {
+                                    foreach ($key as $keyRoute) {
+                                        self::$routesNameMap[$route->getName()] = $keyRoute;
+                                        self::$routes[$keyRoute] = (array)$route;
+                                    }
+                                } else {
+                                    self::$routesNameMap[$route->getName()] = $key;
+                                    self::$routes[$key] = (array)$route;
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            Cache::set(self::CACHE_ROUTING_FILES, self::$routes);
+                Cache::set(self::CACHE_ROUTING_MAP_FILES, self::$routesNameMap);
+                Cache::set(self::CACHE_ROUTING_FILES, self::$routes);
+            }
         }
 
     }
@@ -148,6 +157,12 @@ class Routing
     public static function redirect($name)
     {
         $url = self::url($name);
+
+        if (DI::has('response')) {
+            DI::get('response')->isRedirect($url);
+            DI::get('response')->sendHeaders();
+        }
+
         header("Location: " . $url);
         // die();
     }

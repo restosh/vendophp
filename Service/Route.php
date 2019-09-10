@@ -18,7 +18,7 @@ class Route
     public $name;
 
     /**
-     * @var string
+     * @var string|array
      */
     public $url;
 
@@ -44,15 +44,15 @@ class Route
     public function __construct(array $data)
     {
 
-        if (isset($data['name']) && !empty($data['name'])){
+        if (isset($data['name']) && !empty($data['name'])) {
             $this->setName($data['name']);
         }
 
-        if (isset($data['value']) && !empty($data['value'])){
+        if (isset($data['value']) && !empty($data['value'])) {
             $this->setUrl($data['value']);
         }
 
-        if (isset($data['url']) && !empty($data['url'])){
+        if (isset($data['url']) && !empty($data['url'])) {
             $this->setUrl($data['url']);
         }
 
@@ -80,18 +80,18 @@ class Route
     }
 
     /**
-     * @return string
+     * @return string|array
      */
-    public function getUrl(): string
+    public function getUrl()
     {
         return $this->url;
     }
 
     /**
-     * @param string|null $url
+     * @param string|array|null $url
      * @return Route
      */
-    public function setUrl(string $url): Route
+    public function setUrl($url): Route
     {
         $this->url = $url;
         return $this;
@@ -150,9 +150,6 @@ class Route
         $this->methodName = $methodName;
         return $this;
     }
-
-
-
 
 
 }

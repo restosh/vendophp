@@ -31,7 +31,7 @@ class Env
      */
     public static function isDebug(): bool
     {
-        return filter_var(self::get('IS_DEBUG'), FILTER_VALIDATE_BOOLEAN);
+        return filter_var(self::get('IS_DEBUG', false), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -39,7 +39,7 @@ class Env
      */
     public static function isCache(): bool
     {
-        return filter_var(self::get('IS_CACHE'), FILTER_VALIDATE_BOOLEAN);
+        return filter_var(self::get('IS_CACHE', true), FILTER_VALIDATE_BOOLEAN);
     }
 
     /**

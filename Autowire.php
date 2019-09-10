@@ -65,6 +65,8 @@ class Autowire
             if (DI::has($parameter->getName())) {
                 $dependencies[] = DI::get($parameter->getName());
             } else {
+                dump($parameter->getClass(),false);
+                dump($parameter,false);
                 $class = '\\' . $parameter->getClass()->getName();
                 $dependencies[] = self::resolve($class);
             }
