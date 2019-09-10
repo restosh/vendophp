@@ -73,7 +73,7 @@ class Config
 
             $index = (empty($key) ? '' : $key . '.') . $name;
 
-            if (is_array($value) && null === $value[0]) {
+            if (is_array($value) && isset($value[0]) && null === $value[0]) {
                 self::flatten($value, $index);
             } else {
                 self::$parameters[$index] = $value;
