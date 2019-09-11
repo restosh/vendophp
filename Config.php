@@ -28,7 +28,6 @@ class Config
      */
     public static function get(string $name)
     {
-
         if (self::has($name)) {
             return self::$parameters[$name];
         }
@@ -73,7 +72,7 @@ class Config
 
             $index = (empty($key) ? '' : $key . '.') . $name;
 
-            if (is_array($value) && isset($value[0]) && null === $value[0]) {
+            if (is_array($value) && (!isset($value[0]) || (isset($value[0]) && null === $value[0]))) {
                 self::flatten($value, $index);
             } else {
                 self::$parameters[$index] = $value;
