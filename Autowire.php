@@ -22,7 +22,6 @@ class Autowire
     {
 
         $reflector = new \ReflectionClass($class);
-
         // EVENTS
         // dump($reflector->getParentClass());
 
@@ -34,18 +33,18 @@ class Autowire
 
         Event::invoke(Event::AFTER, $class, '__construct');
 
-        if (null !== $method) {
+        if (null !== $method || $reflector->implementsInterface(ControllerInterface::class)) {
             $reflectionMethod = new \ReflectionMethod($class, $method);
 
             Event::invoke(Event::BEFORE, $class, $method);
-
-         //   try {
-                return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
+            
+            //   try {
+            return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
 
             //} catch (\Exception $exception) {
-           //     Event::invoke(Event::EXCEPTION, $class, $method);
-         //   }
-            
+            //     Event::invoke(Event::EXCEPTION, $class, $method);
+            //   }
+
             Event::invoke(Event::AFTER, $class, $method);
         }
 
@@ -65,8 +64,6 @@ class Autowire
             if (DI::has($parameter->getName())) {
                 $dependencies[] = DI::get($parameter->getName());
             } else {
-                dump($parameter->getClass(),false);
-                dump($parameter,false);
                 $class = '\\' . $parameter->getClass()->getName();
                 $dependencies[] = self::resolve($class);
             }
