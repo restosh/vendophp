@@ -54,6 +54,11 @@ class Routing
         return '/';
     }
 
+    public static function fullUrl(string $name, $args = []): ?string
+    {
+        return Env::get('SERVICE_URL', '/').self::url($name, $args);
+    }
+
     private function load(): void
     {
         $annotationReader = new AnnotationReader();

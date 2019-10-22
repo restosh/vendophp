@@ -38,7 +38,7 @@ class Event
     public static function invoke(string $eventType, string $className, string $method): void
     {
         self::setCurrent($eventType);
-
+        
         $reflector = new \ReflectionClass($className);
         if (false !== $reflector->getParentClass()) {
             self::invoke($eventType, $reflector->getParentClass()->getName(), $method);
@@ -134,7 +134,7 @@ class Event
                         }
                     }
                 }
-                
+
                 Cache::set(self::CACHE_EVENTS_FILES, self::$events);
             }
         }

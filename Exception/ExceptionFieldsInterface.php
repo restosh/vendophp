@@ -3,7 +3,7 @@
 
 namespace VendoPHP\Exception;
 
-interface ExceptionInterface
+interface ExceptionFieldsInterface
 {
 
 }

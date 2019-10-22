@@ -3,6 +3,7 @@
 namespace VendoPHP;
 
 use VendoPHP\Exception\PermissionDeniedVar;
+use VendoPHP\Service\ValidationObject;
 
 /**
  * Class Autowire
@@ -28,7 +29,7 @@ class Autowire
         $constructor = $reflector->getConstructor();
 
         Event::invoke(Event::BEFORE, $class, '__construct');
-
+        
         $instance = (empty($constructor) ? $reflector->newInstance() : $reflector->newInstanceArgs(self::handle($reflector->getConstructor()->getParameters())));
 
         Event::invoke(Event::AFTER, $class, '__construct');
