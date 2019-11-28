@@ -8,10 +8,14 @@ final class InvalidArgumentsException extends \Exception
 
     private $errors = [];
 
-    public function __construct($errors, $message, $code = 0, Exception $previous = null)
+    public function __construct($errors, $message = null, $code = 0, Exception $previous = null)
     {
         $this->errors = $errors;
-        
+
+        if(null === $message){
+            $message = self::MESSAGE;
+        }
+
         parent::__construct($message, $code, $previous);
     }
 
