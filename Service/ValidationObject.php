@@ -15,8 +15,10 @@ class ValidationObject
         $reflector = new \ReflectionClass($object);
         $parameters = $reflector->getConstructor()->getParameters();
 
+
         foreach ($parameters as $parameter) {
             $method = 'set'.ucfirst($parameter->getName());
+            $methodReflector = $reflector->getMethod($method);
 
             try {
                 $object->$method($params[$parameter->getPosition()]);
