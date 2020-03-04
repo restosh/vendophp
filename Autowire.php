@@ -23,31 +23,26 @@ class Autowire
      */
     public static function resolve(string $class, string $method = null)
     {
+        try {
+            $reflector = new \ReflectionClass($class);
 
-        $reflector = new \ReflectionClass($class);
-        // EVENTS
-        // dump($reflector->getParentClass());
+            $constructor = $reflector->getConstructor();
 
-        $constructor = $reflector->getConstructor();
+            $instance = (empty($constructor) ? $reflector->newInstance() : $reflector->newInstanceArgs(self::handle($reflector->getConstructor()->getParameters())));
 
-        Event::invoke(Event::BEFORE, $class, '__construct');
+            if (null !== $method || $reflector->implementsInterface(ControllerInterface::class)) {
+                $reflectionMethod = new \ReflectionMethod($class, $method);
 
-        $instance = (empty($constructor) ? $reflector->newInstance() : $reflector->newInstanceArgs(self::handle($reflector->getConstructor()->getParameters())));
+                Event::invoke(Event::BEFORE, $class);
 
-        Event::invoke(Event::AFTER, $class, '__construct');
-
-        if (null !== $method || $reflector->implementsInterface(ControllerInterface::class)) {
-            $reflectionMethod = new \ReflectionMethod($class, $method);
-
-            Event::invoke(Event::BEFORE, $class, $method);
-
-            try {
                 return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
-            } catch (\Exception $exception) {
-                Event::invoke(Event::EXCEPTION, $class, $method, ['exception' => $exception]);
+
+
+                Event::invoke(Event::AFTER, $class);
             }
 
-            Event::invoke(Event::AFTER, $class, $method);
+        } catch (\Exception $exception) {
+            Event::invoke(Event::EXCEPTION, $class, $exception);
         }
 
         return $instance;

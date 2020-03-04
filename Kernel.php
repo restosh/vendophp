@@ -28,8 +28,6 @@ class Kernel
 
         $this->loadServices();
 
-        $this->loadEvents();
-
         $this->loadHandlers();
 
     }
@@ -67,11 +65,6 @@ class Kernel
         foreach ($files as $file) {
             require_once($file[0]);
         }
-    }
-
-    private function loadEvents(): void
-    {
-        Event::load();
     }
 
     private function loadHandlers(): void

@@ -14,20 +14,42 @@ class Event
     const AFTER = 'afterEvent';
     const EXCEPTION = 'exceptionEvent';
 
+    const PRIORITY_HIGHT = 0;
+    const PRIORITY_MIDDLE = 50;
+    const PRIORITY_LOW = 100;
+
     const METHODS = [
         self::BEFORE,
         self::AFTER,
         self::EXCEPTION,
     ];
 
-    private static $events;
+    private static $events = [
+        self::BEFORE => [],
+        self::AFTER => [],
+        self::EXCEPTION => [],
+    ];
+
     private static $current;
     private static $subscribers;
     private static $subscribersInstance;
 
-    public static function set(string $type, string $class): void
+    public static function add(
+        string $type,
+        string $subscriberClass,
+        string $eventClass,
+        int $priority = self::PRIORITY_LOW
+    ): void
     {
+        if (!isset(self::$events[$type][$subscriberClass])) {
+            self::$events[$type][$subscriberClass] = [];
+        }
 
+        if (!isset(self::$events[$type][$subscriberClass][$priority])) {
+            self::$events[$type][$subscriberClass][$priority] = [];
+        }
+
+        self::$events[$type][$subscriberClass][$priority][$eventClass] = $eventClass;
     }
 
     public static function has(string $eventType, string $className): bool
@@ -35,30 +57,24 @@ class Event
         return isset(self::$events[$eventType][$className]);
     }
 
-    public static function invoke(string $eventType, string $className, string $method, $params = []): void
+    public static function invoke(string $eventType, string $className, $params = null): void
     {
         self::setCurrent($eventType);
 
         $reflector = new \ReflectionClass($className);
         if (false !== $reflector->getParentClass()) {
-            self::invoke($eventType, $reflector->getParentClass()->getName(), $method);
+            self::invoke($eventType, $reflector->getParentClass()->getName(), $params);
         }
 
         if (self::has($eventType, $className)) {
             foreach (self::$events[$eventType][$className] as $priority => $events) {
                 foreach ($events as $subscriberClassName => $event) {
-                    if (isset($event[$method])) {
 
-                        if (!isset(self::$subscribers[$subscriberClassName])) {
-                            // startup event object
-                            self::$subscribers[$subscriberClassName] = new \ReflectionClass($subscriberClassName);
-                            self::$subscribersInstance[$subscriberClassName] = self::$subscribers[$subscriberClassName]->newInstanceWithoutConstructor();
-                            self::$subscribers[$subscriberClassName]->getMethod($eventType)->invokeArgs(self::$subscribersInstance[$subscriberClassName], Autowire::handle(self::$subscribers[$subscriberClassName]->getMethod($eventType)->getParameters()));
-                        }
-
-                        $result = self::$subscribers[$subscriberClassName]->getMethod($method)->invoke(self::$subscribersInstance[$subscriberClassName]);
-
+                    if (!isset(self::$subscribers[$subscriberClassName])) {
+                        self::$subscribers[$subscriberClassName] = Autowire::resolve($subscriberClassName);
                     }
+
+                    self::$subscribers[$subscriberClassName]->{$eventType}($params);
                 }
             }
         }
@@ -74,6 +90,7 @@ class Event
         return self::$current;
     }
 
+    /*
     public static function load(): void
     {
         self::$events = Cache::get(self::CACHE_EVENTS_FILES);
@@ -135,11 +152,12 @@ class Event
                     }
                 }
 
-                var_dump(self::$events); die();
+                var_dump(self::$events);
+                die();
 
                 Cache::set(self::CACHE_EVENTS_FILES, self::$events);
             }
         }
     }
-
+*/
 }
