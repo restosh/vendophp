@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace VendoPHP;
+namespace VendoPHP\Structure;
 
 interface ControllerInterface{
     

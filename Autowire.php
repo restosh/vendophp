@@ -2,8 +2,10 @@
 
 namespace VendoPHP;
 
+use Doctrine\Common\Persistence\ObjectRepository;
 use VendoPHP\Exception\PermissionDeniedVar;
 use VendoPHP\Service\ValidationObject;
+use VendoPHP\Structure\ControllerInterface;
 
 /**
  * Class Autowire
@@ -29,7 +31,7 @@ class Autowire
         $constructor = $reflector->getConstructor();
 
         Event::invoke(Event::BEFORE, $class, '__construct');
-        
+
         $instance = (empty($constructor) ? $reflector->newInstance() : $reflector->newInstanceArgs(self::handle($reflector->getConstructor()->getParameters())));
 
         Event::invoke(Event::AFTER, $class, '__construct');
@@ -38,13 +40,12 @@ class Autowire
             $reflectionMethod = new \ReflectionMethod($class, $method);
 
             Event::invoke(Event::BEFORE, $class, $method);
-            
-            //   try {
-            return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
 
-            //} catch (\Exception $exception) {
-            //     Event::invoke(Event::EXCEPTION, $class, $method);
-            //   }
+            try {
+                return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
+            } catch (\Exception $exception) {
+                Event::invoke(Event::EXCEPTION, $class, $method, ['exception' => $exception]);
+            }
 
             Event::invoke(Event::AFTER, $class, $method);
         }

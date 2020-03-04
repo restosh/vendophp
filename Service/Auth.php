@@ -26,10 +26,6 @@ class Auth
 
     public function login(User $user)
     {
-        if (false === password_verify($loginMessage->getPasswd(), $loginMessage->getUser()->getPasswd())) {
-            throw new AppException(__('incorrect-password'));
-        }
-
         if (false === $user->getIsActive()) {
             throw new AppException(__('login.user.is_not_active'));
         }

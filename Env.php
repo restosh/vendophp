@@ -48,6 +48,7 @@ class Env
      */
     public static function getPath(string $name): ?string
     {
+      //  var_dump($name);
         $value = self::get($name);
 
         if (empty($value)) {

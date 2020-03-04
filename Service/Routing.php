@@ -28,6 +28,11 @@ class Routing
      */
     private $methodName = null;
 
+    /**
+     * @var null | string
+     */
+    private $jsonSchema = null;
+
 
     public function __construct()
     {
@@ -56,7 +61,7 @@ class Routing
 
     public static function fullUrl(string $name, $args = []): ?string
     {
-        return Env::get('SERVICE_URL', '/').self::url($name, $args);
+        return Env::get('SERVICE_URL', '/') . self::url($name, $args);
     }
 
     private function load(): void
@@ -126,6 +131,7 @@ class Routing
 
             $this->setClassName(self::$routes[$url]['className']);
             $this->setMethodName(self::$routes[$url]['methodName']);
+            $this->setJsonSchema(self::$routes[$url]['jsonSchema']);
 
             return true;
         }
@@ -221,6 +227,16 @@ class Routing
         return $this;
     }
 
+    /**
+     * @param string|null $methodName
+     * @return Routing
+     */
+    public function setJsonSchema(?string $jsonSchema): Routing
+    {
+        $this->jsonSchema = $jsonSchema;
+        return $this;
+    }
+
 
     public function getClassName(): string
     {
@@ -232,9 +248,26 @@ class Routing
         return $this->methodName;
     }
 
+    public function getJsonSchema(): string
+    {
+        return $this->jsonSchema;
+    }
+
     public function getRequestMethod(): string
     {
         return strtoupper($_SERVER['REQUEST_METHOD']);
+    }
+
+    public function getRoute(): ?array
+    {
+
+        $url = (isset($_GET['_url']) ? $_GET['_url'] : '/');
+
+        if (!isset(self::$routes[$url])) {
+            return null;
+        }
+
+        return self::$routes[$url];
     }
 
     public static function redirect($name, $args = [])

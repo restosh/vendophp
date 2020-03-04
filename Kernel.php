@@ -26,7 +26,7 @@ class Kernel
 
         $this->loadConfigs();
 
-        $this->loadCustomServices();
+        $this->loadServices();
 
         $this->loadEvents();
 
@@ -39,13 +39,13 @@ class Kernel
         return Autowire::resolve($className, $methodName);
     }
 
-    private function loadEnv(): void
+    public static function loadEnv(): void
     {
         $dotenv = new Dotenv();
         $dotenv->load(APP_DIR . '/.env');
     }
 
-    private function loadCustomServices(): void
+    private function loadDefaultServices(): void
     {
 
         DI::set('commandBus', function () {
@@ -53,7 +53,7 @@ class Kernel
         });
     }
 
-    private function loadDefaultServices(): void
+    public static function loadServices($services = []): void
     {
         $files = Cache::get(self::CACHE_SERVICE_FILES);
 
@@ -61,7 +61,6 @@ class Kernel
             $directory = new \RecursiveDirectoryIterator(Env::getPath('DIR_SERVICE'));
             $iterator = new \RecursiveIteratorIterator($directory);
             $files = (iterator_to_array(new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH)));
-
             Cache::set(self::CACHE_SERVICE_FILES, $files);
         }
 

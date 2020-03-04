@@ -38,6 +38,12 @@ class Route
     public $methodName;
 
     /**
+     * @var null|string
+     */
+    public $jsonSchema;
+
+
+    /**
      * Route constructor.
      * @param array $data
      */
@@ -58,6 +64,10 @@ class Route
 
         if (isset($data['methods']) && !empty($data['methods'])) {
             $this->setMethods($data['methods']);
+        }
+
+        if (isset($data['schema']) && !empty($data['schema'])) {
+            $this->setJsonSchema($data['schema']);
         }
     }
 
@@ -151,5 +161,22 @@ class Route
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getJsonSchema(): ?string
+    {
+        return $this->jsonSchema;
+    }
+
+    /**
+     * @param string|null $jsonSchema
+     * @return Route
+     */
+    public function setJsonSchema(?string $jsonSchema): Route
+    {
+        $this->jsonSchema = $jsonSchema;
+        return $this;
+    }
 
 }
