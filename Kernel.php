@@ -37,6 +37,10 @@ class Kernel
         return Autowire::resolve($className, $methodName);
     }
 
+    public function handleQueues(){
+
+    }
+
     public static function loadEnv(): void
     {
         $dotenv = new Dotenv();

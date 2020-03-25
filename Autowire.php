@@ -13,8 +13,6 @@ use VendoPHP\Structure\ControllerInterface;
  */
 class Autowire
 {
-
-
     /**
      * @param string $class
      * @param string|null $method
@@ -35,10 +33,11 @@ class Autowire
 
                 Event::invoke(Event::BEFORE, $class);
 
-                return $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
+                $result = $reflectionMethod->invokeArgs($instance, self::handle($reflectionMethod->getParameters()));
 
+                Event::invoke(Event::AFTER, $class, $result);
 
-                Event::invoke(Event::AFTER, $class);
+                return $result;
             }
 
         } catch (\Exception $exception) {

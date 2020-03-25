@@ -44,7 +44,7 @@ class DI
      */
     public function has(string $name): bool
     {
-        return (isset(self::$instances[$name]) || self::$services[$name]);
+        return (isset(self::$instances[$name]) || isset(self::$services[$name]));
     }
 
     /**

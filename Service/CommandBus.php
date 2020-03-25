@@ -94,6 +94,8 @@ class CommandBus
                 $object = Autowire::resolve($handlerClassName);
                 $object->invoke($message);
             }
+        }else{
+            throw new \Exception(sprintf('Hander for message %s does\'t exist.', $className));
         }
     }
 }
