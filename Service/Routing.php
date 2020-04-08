@@ -14,9 +14,13 @@ class Routing
 
     const CACHE_ROUTING_FILES = 'vendophp.routing';
     const CACHE_ROUTING_MAP_FILES = 'vendophp.routing_map';
+    const CACHE_ROUTING_METHOD_MAP_FILES = 'vendophp.routing_method_map';
 
-    private static $routes = [];
+
+    private static $method;
+
     private static $routesNameMap = [];
+    private static $routesMethodMap = [];
 
     /**
      * @var null | string
@@ -33,9 +37,16 @@ class Routing
      */
     private $jsonSchema = null;
 
+    /**
+     * @var null | array
+     */
+    private $roles = [];
+
 
     public function __construct()
     {
+        self::$method = $_SERVER['REQUEST_METHOD'];
+
         $this->load();
 
         $this->dispatch();
@@ -69,10 +80,10 @@ class Routing
         $annotationReader = new AnnotationReader();
         $routeInit = new Route([]);
 
-        self::$routes = Cache::get(self::CACHE_ROUTING_FILES);
-        self::$routesNameMap = Cache::get(self::CACHE_ROUTING_MAP_FILES);
+        self::$routesNameMap = DI::get('cache')->get(self::CACHE_ROUTING_MAP_FILES);
+        self::$routesMethodMap = DI::get('cache')->get(self::CACHE_ROUTING_METHOD_MAP_FILES);
 
-        if (null === self::$routes || null === self::$routesNameMap) {
+        if (null === self::$routesMethodMap || null === self::$routesNameMap) {
 
             $directory = new \RecursiveDirectoryIterator(Env::getPath('DIR_CONTROLLER'));
             $iterator = new \RecursiveIteratorIterator($directory);
@@ -95,54 +106,59 @@ class Routing
 
                                 if (is_array($key)) {
                                     foreach ($key as $keyRoute) {
-                                        self::$routesNameMap[$route->getName()] = $keyRoute;
-                                        self::$routes[$keyRoute] = (array)$route;
+                                        $this->registerRouter($keyRoute, $route);
                                     }
                                 } else {
-                                    self::$routesNameMap[$route->getName()] = $key;
-                                    self::$routes[$key] = (array)$route;
+                                    $this->registerRouter($key, $route);
                                 }
                             }
                         }
                     }
                 }
 
-                Cache::set(self::CACHE_ROUTING_MAP_FILES, self::$routesNameMap);
-                Cache::set(self::CACHE_ROUTING_FILES, self::$routes);
+                DI::get('cache')->set(self::CACHE_ROUTING_MAP_FILES, self::$routesNameMap);
+                DI::get('cache')->set(self::CACHE_ROUTING_METHOD_MAP_FILES, self::$routesMethodMap);
             }
         }
+    }
 
+    private function registerRouter($key, $route)
+    {
+        self::$routesNameMap[$route->getName()] = $key;
+
+        foreach ($route->getMethods() as $method) {
+            self::$routesMethodMap[$method][$key] = (array)$route;
+        }
     }
 
     private function dispatch()
     {
         $url = (isset($_GET['_url']) ? $_GET['_url'] : '/');
 
-        if (!isset(self::$routes[$url])) {
-            $url = self::searchMap($url);
+        if (!isset(self::$routesMethodMap[self::$method])) {
+            throw new NotFoundException(NotFoundException::MESSAGE);
         }
 
-        if (isset(self::$routes[$url])) {
-            if (!empty(self::$routes[$url]['methods'])) {
-                if (!in_array($this->getRequestMethod(), self::$routes[$url]['methods'])) {
-                    throw new NotFoundException(NotFoundException::MESSAGE);
-                }
-            }
+        $findUrl = self::searchMap($url, self::$routesMethodMap[self::$method]);
 
-            $this->setClassName(self::$routes[$url]['className']);
-            $this->setMethodName(self::$routes[$url]['methodName']);
-            $this->setJsonSchema(self::$routes[$url]['jsonSchema']);
-
-            return true;
+        if (!isset(self::$routesMethodMap[self::$method][$findUrl])) {
+            throw new NotFoundException(NotFoundException::MESSAGE);
         }
 
-        throw new NotFoundException(NotFoundException::MESSAGE);
+        $route = self::$routesMethodMap[self::$method][$findUrl];
 
+        $this->setClassName($route['className']);
+        $this->setMethodName($route['methodName']);
+        $this->setJsonSchema($route['jsonSchema']);
+        $this->setRoles($route['roles']);
+
+        return true;
     }
 
-    private static function searchMap(string $url): ?string
+
+    private static function searchMap(string $url, &$routes): ?string
     {
-        foreach (self::$routes as $route => $value) {
+        foreach ($routes as $route => $value) {
             if (substr_count($route, '/') === substr_count($url, '/')) {
                 $crumbsRoute = explode('/', $route);
                 $crumbsUrl = explode('/', $url);
@@ -170,7 +186,7 @@ class Routing
         $parse = parse_url($url);
         $url = $parse['path'];
 
-        foreach (self::$routes as $route => $value) {
+        foreach (self::$routesMethodMap[self::$method] as $route => $value) {
 
             if (substr_count($route, '/') === substr_count($url, '/')) {
                 $params = [];
@@ -200,6 +216,16 @@ class Routing
     public static function getParam(string $url, string $name): ?string
     {
         $params = self::getParams($url);
+        if (isset($params[$name])) {
+            return $params[$name];
+        }
+
+        return null;
+    }
+
+    public static function getUrlParam(string $name): ?string
+    {
+        $params = self::getParams($_SERVER['REQUEST_URI']);
         if (isset($params[$name])) {
             return $params[$name];
         }
@@ -248,9 +274,20 @@ class Routing
         return $this->methodName;
     }
 
-    public function getJsonSchema(): string
+    public function getJsonSchema(): ?string
     {
         return $this->jsonSchema;
+    }
+
+    public function setRoles($roles): Routing
+    {
+        $this->roles = $roles;
+        return $this;
+    }
+
+    public function getRoles(): ?array
+    {
+        return $this->roles;
     }
 
     public function getRequestMethod(): string
@@ -258,17 +295,6 @@ class Routing
         return strtoupper($_SERVER['REQUEST_METHOD']);
     }
 
-    public function getRoute(): ?array
-    {
-
-        $url = (isset($_GET['_url']) ? $_GET['_url'] : '/');
-
-        if (!isset(self::$routes[$url])) {
-            return null;
-        }
-
-        return self::$routes[$url];
-    }
 
     public static function redirect($name, $args = [])
     {

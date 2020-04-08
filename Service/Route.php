@@ -42,6 +42,11 @@ class Route
      */
     public $jsonSchema;
 
+    /**
+     * @var null|array
+     */
+    public $roles;
+
 
     /**
      * Route constructor.
@@ -68,6 +73,10 @@ class Route
 
         if (isset($data['schema']) && !empty($data['schema'])) {
             $this->setJsonSchema($data['schema']);
+        }
+
+        if (isset($data['roles']) && !empty($data['roles'])) {
+            $this->setRoles($data['roles']);
         }
     }
 
@@ -176,6 +185,24 @@ class Route
     public function setJsonSchema(?string $jsonSchema): Route
     {
         $this->jsonSchema = $jsonSchema;
+        return $this;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getRoles(): ?array
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param array|null $roles
+     * @return Route
+     */
+    public function setRoles(?array $roles): Route
+    {
+        $this->roles = $roles;
         return $this;
     }
 

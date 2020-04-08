@@ -46,8 +46,7 @@ class Config
 
     public static function load(): void
     {
-
-        self::$parameters = Cache::get(self::CACHE_PARAMETERS_NAME);
+        self::$parameters = DI::get('cache')->get(self::CACHE_PARAMETERS_NAME);
 
         if (null === self::$parameters) {
 
@@ -62,7 +61,7 @@ class Config
                 }
             }
 
-            Cache::set(self::CACHE_PARAMETERS_NAME, self::$parameters);
+            DI::get('cache')->set(self::CACHE_PARAMETERS_NAME, self::$parameters);
         }
     }
 

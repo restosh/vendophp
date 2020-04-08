@@ -22,8 +22,6 @@ class Kernel
     {
         $this->loadEnv();
 
-        $this->loadDefaultServices();
-
         $this->loadConfigs();
 
         $this->loadServices();
@@ -47,23 +45,15 @@ class Kernel
         $dotenv->load(APP_DIR . '/.env');
     }
 
-    private function loadDefaultServices(): void
-    {
-
-        DI::set('commandBus', function () {
-            return (new CommandBus());
-        });
-    }
-
     public static function loadServices($services = []): void
     {
-        $files = Cache::get(self::CACHE_SERVICE_FILES);
+        $files = DI::get('cache')->get(self::CACHE_SERVICE_FILES);
 
         if (null === $files) {
             $directory = new \RecursiveDirectoryIterator(Env::getPath('DIR_SERVICE'));
             $iterator = new \RecursiveIteratorIterator($directory);
             $files = (iterator_to_array(new \RegexIterator($iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH)));
-            Cache::set(self::CACHE_SERVICE_FILES, $files);
+            DI::get('cache')->set(self::CACHE_SERVICE_FILES, $files);
         }
 
         foreach ($files as $file) {

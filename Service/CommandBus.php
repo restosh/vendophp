@@ -41,7 +41,7 @@ class CommandBus
 
     public static function load(): void
     {
-        self::$handlers = Cache::get(self::CACHE_HANDLERS_NAME);
+        self::$handlers = DI::get('cache')->get(self::CACHE_HANDLERS_NAME);
 
         if (empty(self::$handlers)) {
             $dirHandler = Env::getPath('DIR_HANDLER');
@@ -76,7 +76,7 @@ class CommandBus
                 }
             }
 
-            Cache::set(self::CACHE_HANDLERS_NAME, self::$handlers);
+            DI::get('cache')->set(self::CACHE_HANDLERS_NAME, self::$handlers);
         }
     }
 

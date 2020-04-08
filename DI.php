@@ -62,7 +62,7 @@ class DI
             return self::register($name, self::$services[$name]);
         }
 
-        throw new ServiceNotFound(ServiceNotFound::Message);
+        throw new ServiceNotFound(ServiceNotFound::MESSAGE);
     }
 
     /**
@@ -72,8 +72,19 @@ class DI
      */
     public static function register($name, $function)
     {
-
         self::$instances[$name] = $function();
+
+        return self::$instances[$name];
+    }
+
+    /**
+     * @param $name
+     * @param $function
+     * @return mixed
+     */
+    public static function add($name, $object)
+    {
+        self::$instances[$name] = $object;
 
         return self::$instances[$name];
     }
