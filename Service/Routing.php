@@ -42,6 +42,11 @@ class Routing
      */
     private $roles = [];
 
+    /**
+     * @var null | array
+     */
+    private $rules = [];
+
 
     public function __construct()
     {
@@ -151,6 +156,7 @@ class Routing
         $this->setMethodName($route['methodName']);
         $this->setJsonSchema($route['jsonSchema']);
         $this->setRoles($route['roles']);
+        $this->setRules($route['rules']);
 
         return true;
     }
@@ -288,6 +294,17 @@ class Routing
     public function getRoles(): ?array
     {
         return $this->roles;
+    }
+
+    public function getRules(): ?array
+    {
+        return $this->rules;
+    }
+
+    public function setRules($rules): Routing
+    {
+        $this->rules = $rules;
+        return $this;
     }
 
     public function getRequestMethod(): string

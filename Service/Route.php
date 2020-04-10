@@ -47,6 +47,11 @@ class Route
      */
     public $roles;
 
+    /**
+     * @var null|array
+     */
+    public $rules;
+
 
     /**
      * Route constructor.
@@ -77,6 +82,10 @@ class Route
 
         if (isset($data['roles']) && !empty($data['roles'])) {
             $this->setRoles($data['roles']);
+        }
+
+        if (isset($data['rules']) && !empty($data['rules'])) {
+            $this->setRules($data['rules']);
         }
     }
 
@@ -206,4 +215,21 @@ class Route
         return $this;
     }
 
+    /**
+     * @return array|null
+     */
+    public function getRules(): ?array
+    {
+        return $this->rules;
+    }
+
+    /**
+     * @param array|null $roles
+     * @return Route
+     */
+    public function setRules(?array $rules): Route
+    {
+        $this->rules = $rules;
+        return $this;
+    }
 }
